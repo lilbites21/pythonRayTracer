@@ -1,9 +1,9 @@
 import pygame
 import math
+
 from Vectors import vector
-from Surface import surface
-from sunLight import sunLight
-import Prims
+
+import Scene
 
 WIDTH , HEIGHT = 400,400
 FRAMERATE = 0.0001
@@ -13,32 +13,14 @@ screen = pygame.display.set_mode((WIDTH,HEIGHT))
 
 viewDistance = 1000
 
-playerPos = vector(0,1,0)
-lookingDir = vector(.3,0,0)
+playerPos = vector(0,5,0)
+lookingDir = vector(1.4,0,0)
 
 
-ball1Pos = vector(1,0,4)
-ball1Radius = 1
-ball1Surface = surface(pygame.Color(100,100,200),matalicness=.0,opacity=0)
-
-ball2Pos = vector(.5,2,4)
-ball2Radius = 1
-ball2Surface = surface(pygame.Color(200,100,100),matalicness=.0,opacity=0)
-
-plane1Pos = vector(0,-1.25,5)
-plane1Normal = vector(0,1,0)
-plane1Surface = surface(color=pygame.Color(0,255,0),matalicness=.1)
-
-ball1 = Prims.sphere(ball1Pos,ball1Radius,name="ball",surface= ball1Surface)
-ball2 = Prims.sphere(ball2Pos,ball2Radius, surface=ball2Surface)
-plane1 = Prims.plane(center=plane1Pos,normal=plane1Normal,surface=plane1Surface,name= "plane 1")
-
-sun = sunLight(vector(0,-1,0),2)
-
-skySurface = surface((102,153,204))
 skyColor = pygame.Color(102, 153, 204)
 
-objects = [plane1,ball1,ball2]
+objects,lights = Scene.get()
+print(objects[0])
 
 
 def addColor(col1:pygame.Color,col2:pygame.Color):
@@ -68,21 +50,23 @@ def getObjectInDir(looking:vector,startPos:vector):
     closest = 0
     closenest = viewDistance
     #goes through eich object to find what object it is
-    
     for obj in objects:
         dist,hitpoint,normal = obj.getByRay(startPos,looking)
         if dist > 0 and (dist < closenest):
             closest = obj
-            closenest = dist
+            closenest = dist*1
         
     return closest
 
 
 
-def getShade(normal:vector):
+def getShade(normal:vector,hitpoint:vector):
+    colorScale = 0
+    if(hitpoint != 0):
+        objToSun = getObjectInDir((lights[0].getDir(hitpoint)*(-1)),hitpoint)
+        colorScale = ((lights[0].getDir(hitpoint)*(-1))*normal)
+        colorScale *= lights[0].intencity
     #takes the dot product to the sun and shades on that
-    colorScale:float = ((sun.dir)*(-1)) * normal
-    colorScale *= sun.intencity
     if colorScale <= 0:
         return 0
     return colorScale
@@ -100,10 +84,10 @@ def rayColor(startRay:vector,times,startPos:vector):
         dist,hitpoint,normal = thisObj.getByRay(startPos,startRay)
     if(dist > 0):
         reflectRay = startRay - (normal*(startRay*normal))*2
-        colorScale = getShade(normal)
-        objToSun = getObjectInDir(hitpoint,sun.dir*(-1))
-        if objToSun == 0: #TODO cant get this to work, planes are actung up
-            startColor = addColor(startColor,mulColor(mulColor(thisObj.surfaces.color,colorScale),1-thisObj.surfaces.matlicness))
+        colorScale = getShade(normal,hitpoint)
+        objToSun = getObjectInDir(hitpoint,lights[0].dir*(-1))
+        #if objToSun == 0: #TODO cant get this to work, planes are acting up
+        startColor = addColor(startColor,mulColor(mulColor(thisObj.surfaces.color,colorScale),1-thisObj.surfaces.matlicness))
         if(times > 0):
             startColor = startColor + mulColor(rayColor(reflectRay,times-1,hitpoint),thisObj.surfaces.matlicness)
         

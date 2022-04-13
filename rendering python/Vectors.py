@@ -73,3 +73,5 @@ class vector:
         b = math.acos((self*vector(0,1,0))/self.mag())
         c = math.acos((self*vector(0,0,1))/self.mag())
         return vector(a,b,c)
+    def neg(self):
+        return self*(-1)

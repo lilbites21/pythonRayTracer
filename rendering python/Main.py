@@ -13,14 +13,13 @@ screen = pygame.display.set_mode((WIDTH,HEIGHT))
 
 viewDistance = 1000
 
-playerPos = vector(0,5,0)
-lookingDir = vector(1.4,0,0)
+playerPos = vector(0,2,0)
+lookingDir = vector(1,0,0)
 
 
 skyColor = pygame.Color(102, 153, 204)
 
 objects,lights = Scene.get()
-print(objects[0])
 
 
 def addColor(col1:pygame.Color,col2:pygame.Color):
@@ -62,10 +61,12 @@ def getObjectInDir(looking:vector,startPos:vector):
 
 def getShade(normal:vector,hitpoint:vector):
     colorScale = 0
+    lookingAtSun = lights[0].getDir(hitpoint).neg()
     if(hitpoint != 0):
-        objToSun = getObjectInDir((lights[0].getDir(hitpoint)*(-1)),hitpoint)
-        colorScale = ((lights[0].getDir(hitpoint)*(-1))*normal)
-        colorScale *= lights[0].intencity
+        objToSun = getObjectInDir(lookingAtSun,hitpoint + lookingAtSun*.1)
+        if(objToSun == 0):
+            colorScale = lookingAtSun*normal
+            colorScale *= lights[0].intencity
     #takes the dot product to the sun and shades on that
     if colorScale <= 0:
         return 0

@@ -24,7 +24,7 @@ ball2Surface = surface(Color(200,100,100),matalicness=.0,opacity=0)
 
 plane1Pos = vector(0,-1.25,0)
 plane1Normal = vector(0,1,0)
-plane1Surface = surface(color=Color(0,255,0),matalicness=0,normalMap=getNormalInfo(normalMap2,scale=[5,5]))
+plane1Surface = surface(color=Color(0,255,0),matalicness=.1,normalMap=getNormalInfo(normalMap2,scale=[1,1]))
 
 ball1 = Prims.sphere(ball1Pos,ball1Radius,name="ball",surface= ball1Surface)
 ball2 = Prims.sphere(ball2Pos,ball2Radius, surface=ball2Surface)
